@@ -1,10 +1,13 @@
 local s = core.get_mod_storage()
 vanish = {}
 vanish.vanished = {}
+vanish.orig_sizes = {}
 vanish.on = function(player)
-	vanish.vanished[player:get_player_name()] = true
+	local name = player:get_player_name()
+	vanish.vanished[name] = true
+	vanish.orig_sizes[name] = player:get_properties().visual_size
 	player:set_properties({
-		visual = "",
+		visual_size = vector.zero(),
 		--collisionbox = {-0.01, 0, -0.01, 0.01, 0, 0.01},
 		show_on_minimap = false,
 		pointable = false,
@@ -16,11 +19,12 @@ vanish.off = function(player)
 	local name = player:get_player_name()
 	if not name then return end
 	player:set_properties({
-			 	visual = "mesh",
-	 			--collisionbox = {-0.3, 0.0, -0.3, 0.3, 1.7, 0.3},
-			 	show_on_minimap = true,
-		 		pointable = true,
-  		})
+		visual_size = vanish.orig_sizes[name] or vector.new(1,1,1),
+		--collisionbox = {-0.3, 0.0, -0.3, 0.3, 1.7, 0.3},
+		show_on_minimap = true,
+		pointable = true,
+	})
+	vanish.orig_sizes[name] = nil
 	if core.get_modpath("nick_prefix") then
 		nick_prefix.update_ntag(name)
 	else
